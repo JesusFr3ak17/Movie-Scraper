@@ -5,6 +5,7 @@ import re
 from urllib.parse import urlparse
 import time
 # Function to extract all movies from the search result
+@st.cache_data
 def extract_movies(search_term):
     all_movie_list = {}
     strip_search = str.lower(search_term[0])
@@ -44,6 +45,7 @@ def extract_movies(search_term):
     return all_movie_list
 
 # Function to get seasons for a movie
+@st.cache_data
 def get_seasons(url):
     response = requests.get(url)
     search_response = BeautifulSoup(response.text, 'html.parser')
