@@ -72,7 +72,7 @@ with st.expander('What is RobinHood?'):
 search_term = st.text_input("Search for a movie")
 
 # Search button
-if st.button("Search"):
+if search_term:
     # Perform search and display results
     # Perform search and display results
     st.write(f"Search results for '{search_term}':")
