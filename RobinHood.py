@@ -163,5 +163,5 @@ if select_vendor == 'ToxicWap':
             st.write("No movies found for the search term.")
 else:
     with st.spinner(text="Development in progress, use ToxicWap ... "):
-
+        time.sleep(10000)
 
