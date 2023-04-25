@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import streamlit as st
 import re
 from urllib.parse import urlparse
-
+import time
 # Function to extract all movies from the search result
 def extract_movies(search_term):
     all_movie_list = {}
@@ -76,9 +76,10 @@ if select_vendor == 'ToxicWap':
     if search_term:
         # Perform search and display results
         # Perform search and display results
-        st.spinner(f"Fetching results for '{search_term}' ... ") 
+        with st.spinner(f"Fetching results for '{search_term}' ... ") :
 # Get all movies for the search term
-        all_movies = extract_movies(search_term)
+            all_movies = extract_movies(search_term)
+        st.success('Done')
         if all_movies:
             all_movies = {k: v for k, v in all_movies.items() if k != '' and k != 'Next' and not k.isdigit()}
             # Display all movies as buttons with their image and seasons
@@ -161,6 +162,7 @@ if select_vendor == 'ToxicWap':
         if not all_movies:
             st.write("No movies found for the search term.")
 else:
-    st.spinner(text="Development in progress ... ")
+    with st.spinner(text="Development in progress ... "):
+        time.sleep(1)
 
 
