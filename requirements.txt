@@ -1,0 +1,5 @@
+streamlit
+urllib
+bs4
+requests
+regex
