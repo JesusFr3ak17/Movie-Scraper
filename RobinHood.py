@@ -108,7 +108,7 @@ if select_vendor == 'ToxicWap':
                         with st.expander(f"Season {season[0]}"):
                             if st.button(f"Download {season[0]}", key=f"{title}-season-{season[0]}", use_container_width=True):
                             # Perform download logic for the season
-                                st.write(f"{title} season {season[0]} is selected.")  
+                                st.write(f"{title} {season[0]} is selected.")  
                                 urls = season[1]
                                 new = 'https://' + str(site_name) + urls
                                 season_explore = requests.get(new)
