@@ -4,6 +4,7 @@ import streamlit as st
 import re
 from urllib.parse import urlparse
 import time
+import itertools
 # Function to extract all movies from the search result
 @st.cache_data
 def extract_movies(search_term):
@@ -57,6 +58,53 @@ def get_seasons(url):
             seasons.append((text, href))
     return seasons
 
+@st.cache_data
+def all_movies_nkiri(search_term):
+    url = "https://nkiri.com/?s=" + str(search_term) + "&post_type=post"
+    all_movie_list = {}
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'}
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    primary_div = soup.find('div', {'id': 'primary', 'class': 'content-area clr'})
+    secondary_div = soup.find_all('div', {'class': 'search-entry-inner clr'})
+    for divs in secondary_div:
+        image = divs.find('div', {'class': 'thumbnail'})
+        src = image.find('img')
+        src = src['src']
+        #print(src)
+        h2 = divs.find('h2', {'class': 'search-entry-title entry-title'})
+        a_tag = h2.find('a')
+        text = a_tag.text
+        href = a_tag['href']
+        all_movie_list[text] = (href, src)
+    return all_movie_list
+
+@st.cache_data
+def all_episodes_nkiri(url):
+    all_episodes = {}
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'}
+    episode_details = []
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    elementor_button = soup.find_all('div', {'class': 'elementor-button-wrapper'})    
+    for elements in elementor_button:
+        download_link = elements.find('a')
+        download_link = download_link['href']
+        span = elements.find('span')
+        span = span.text
+        span = span.replace(" ", "").replace("\n", "").replace("\t", "").replace("'", "")
+        file_name = download_link.split("/")[-1].replace(".html", "")
+        if "howtodownload" not in str.lower(span) and "cantdownload?" not in str.lower(span):
+            #print(str(movie_name))
+                #print(file_name)
+                #print(download_link)
+                #print('\n\n')
+            episode_details.append((file_name, download_link))
+    all_episodes[file_name] = episode_details
+                
+    return all_episodes
 
 # Streamlit app code
 st.set_page_config(page_title="RobinHood 🗡️", page_icon="🗡️")
@@ -71,9 +119,12 @@ with st.expander('What is RobinHood?'):
 
 
 # Search box
-select_vendor = st.radio('Select download source', ('ToxicWap', '02TV series', 'NetNaija', 'Nkiri'), index=0)
+
+select_vendor = st.radio('Select download source: ', ('ToxicWap', '02TV series', 'NetNaija', 'Nkiri'), index=0)
+
 if select_vendor == 'ToxicWap':
     search_term = st.text_input("Search for a movie")
+    st.markdown(f"<p><i> To guarantee speed and efficient resource usage, search results are limited to just 5 (five).</i></p>", unsafe_allow_html=True)
 # Search button
     if search_term:
         # Perform search and display results
@@ -84,6 +135,7 @@ if select_vendor == 'ToxicWap':
         st.success('Done')
         if all_movies:
             all_movies = {k: v for k, v in all_movies.items() if k != '' and k != 'Next' and not k.isdigit()}
+            all_movies = {k: v for k, v in itertools.islice(all_movies.items(), 5)}
             # Display all movies as buttons with their image and seasons
             for title, url in all_movies.items():
                 season_url = url
@@ -163,6 +215,44 @@ if select_vendor == 'ToxicWap':
                 # Display message if there are no search results
         if not all_movies:
             st.write("No movies found for the search term.")
+elif select_vendor == 'Nkiri':
+    search_term = st.text_input("Search for a movie")
+    st.markdown(f"<p><i> To guarantee speed and efficient resource usage, search results are limited to just 5 (five).</i></p>", unsafe_allow_html=True)
+# Search button
+    if search_term:
+        # Perform search and display results
+        # Perform search and display results
+        st.write(f"Search results for '{search_term}':")
+# Get all movies for the search term
+        all_movies = all_movies_nkiri(search_term)
+        all_movies = {k: v for k, v in itertools.islice(all_movies.items(), 5)}
+        if all_movies:
+            # Display all movies as buttons with their image and seasons
+            for title, details in all_movies.items():
+                st.markdown(f"## {title}")
+                # Get the image for the movie
+                try:
+                    image_response = requests.get(details[1])
+                    image_bytes = image_response.content
+                    st.image(image_bytes, use_column_width=True)
+                except:
+                    st.write("Image not available")
+
+                # Get the seasons for the movie
+                all_files = all_episodes_nkiri(details[0])
+                if len(all_files) == 0:
+                    st.write('No movies available')
+                else:
+                    for movie, link_tuple in all_files.items():
+                        with st.expander(f"{title}"):
+                            if st.button(f"Generate Download Link", key=f"{title}", use_container_width=True):
+                            # Perform download logic for the season
+                                for all_links in link_tuple:
+                                    episode_html = f'<a href="{all_links[1]}">{all_links[0]}</a>'
+                                    st.markdown(episode_html, unsafe_allow_html=True)
+
+
+                # Display message if there are no search results
 else:
     with st.spinner(text="Development in progress, use ToxicWap ... "):
         time.sleep(10000)
