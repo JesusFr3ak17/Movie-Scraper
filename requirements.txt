@@ -3,4 +3,3 @@ urllib3
 bs4
 requests
 regex
-itertools
