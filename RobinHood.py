@@ -208,8 +208,17 @@ if select_vendor == 'ToxicWap':
                                 for episode in all_episodes:
                                     episode_name = episode[0]
                                     episode_link = episode[1]
-                                    episode_html = f'<a href="{episode_link}">{episode_name}</a>'
-                                    st.markdown(episode_html, unsafe_allow_html=True)
+                                    episode_response = requests.get(episode_link)
+                                    episode_soup = BeautifulSoup(episode_response.text, 'html.parser')
+                                    episode_download_links = episode_soup.find_all('a', string='Download')
+                                    if episode_download_links:
+                                        episode_href = episode_download_links[0]['href']
+                                        episode_href = 'https://' + str(site_name) + episode_href
+                                        episode_html = f'<a href="{episode_href}">{episode_name}</a>'
+                                        st.markdown(episode_html, unsafe_allow_html=True)
+                                    else:
+                                        episode_html = f'<a href="{episode_link}">{episode_name}</a>'
+                                        st.markdown(episode_html, unsafe_allow_html=True)
 
 
                 # Display message if there are no search results
