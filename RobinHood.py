@@ -120,7 +120,8 @@ with st.expander('What is RobinHood?'):
 
 # Search box
 
-select_vendor = st.radio('Select download source: ', ('ToxicWap', '02TV series', 'NetNaija', 'Nkiri'), index=0)
+#select_vendor = st.radio('Select download source: ', ('ToxicWap', '02TV series', 'NetNaija', 'Nkiri'), index=0)
+select_vendor = st.radio('Select download source: ', ('Nkiri', 'ToxicWap'), index=0)
 
 if select_vendor == 'ToxicWap':
     search_term = st.text_input("Search for a movie")
@@ -265,4 +266,3 @@ elif select_vendor == 'Nkiri':
 else:
     with st.spinner(text="Development in progress, use ToxicWap ... "):
         time.sleep(10000)
-
