@@ -244,7 +244,7 @@ elif select_vendor == 'Nkiri':
                 try:
                     image_response = requests.get(details[1])
                     image_bytes = image_response.content
-                    st.image(image_bytes, use_column_width=True)
+                    st.image(image_bytes, use_column_width=True, output_format="auto")
                 except:
                     st.write("Image not available")
 
